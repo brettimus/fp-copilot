@@ -1,39 +1,70 @@
 import fs from "node:fs";
 import path from "node:path";
-import { createClient } from "@supabase/supabase-js";
 
-const HOST = "http://127.0.0.1:54321";
-const ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0";
-
-// Create a single supabase client for interacting with your database
-const supabase = createClient(HOST, ANON_KEY);
+import { supabase } from "./client.js";
 
 const directoryPath = "./db";
 
+forEachJsonFile(directoryPath, async (notebook) => {
+  const { data: embeddingResponse, error } = await supabase.functions.invoke(
+    "notebook-to-embeddings",
+    {
+      body: { notebook },
+    }
+  );
 
-fs.readdir(directoryPath, (err, files) => {
-  if (err) {
-    return console.error(`Unable to scan directory: ${err}`);
+  // TODO - handle error
+  if (error) {
+    console.error(
+      `Error creating embedding for notebook ${notebook.title} (${notebook.id})`,
+      error
+    );
+    return;
   }
 
-  for (const file of files) {
-    if (path.extname(file) === ".json") {
-      fs.readFile(path.join(directoryPath, file), "utf8", (err, contents) => {
+  const notebookEmbedding = {
+    notebook_id: notebook.id,
+    embedding: embeddingResponse.embedding,
+    title: notebook.title,
+  };
+
+  // Store the vector in Postgres
+  const { data, error: insertError } = await supabase
+    .from("notebooks")
+    .insert(notebookEmbedding);
+
+  if (insertError) {
+    console.error(
+      `Error inserting notebook embedding  ${notebook.title} (${notebook.id})`,
+      insertError
+    );
+    return;
+  }
+
+  console.log(`Created embeddings for ${notebook.title}`);
+  console.log(data);
+});
+
+function forEachJsonFile(directory, callback) {
+  fs.readdir(directory, (err, files) => {
+    if (err) {
+      return console.error(`Unable to scan directory: ${err}`);
+    }
+
+    const jsonFiles = files.filter((file) => path.extname(file) === ".json");
+
+    for (const file of jsonFiles) {
+      fs.readFile(path.join(directory, file), "utf8", async (err, contents) => {
         if (err) {
           return console.error(`Unable to read file: ${err}`);
         }
-        console.log(`Contents of ${file}:`);
-        const notebook = JSON.parse(contents);
-        console.log(notebook.id);
 
-        supabase.functions.invoke("notebook-to-embeddings", {
-          body: { notebook },
-        })
+        callback(JSON.parse(contents));
       });
     }
-  }
-});
+  });
+
+}
 
 /**
  * Helper that can create embeddings for each "chunk" of a notebook
