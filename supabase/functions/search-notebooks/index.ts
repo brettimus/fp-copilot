@@ -3,22 +3,11 @@
 // This enables autocomplete, go to definition, etc.
 
 // Setup type definitions for built-in Supabase Runtime APIs
-/// <reference types="https://esm.sh/@supabase/functions-js/src/edge-runtime.d.ts" />
+/// <reference types="https://esm.sh/v135/@supabase/functions-js@2.3.1/src/edge-runtime.d.ts" />
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.7";
+import { supabaseClient } from "../_shared/supabase.ts";
 
 const session = new Supabase.ai.Session("gte-small");
-
-// const HOST = "http://127.0.0.1:54321";
-// NOTE - Necessary for docker on macOS
-const HOST = "http://host.docker.internal:54321";
-const ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0";
-
-const supabaseClient = createClient(
-  HOST,
-  ANON_KEY,
-);
 
 Deno.serve(async (req) => {
   const { query } = await req.json();
@@ -34,9 +23,9 @@ Deno.serve(async (req) => {
   const { data: notebooks, error } = await supabaseClient.rpc(
     "match_notebooks",
     {
-      query_embedding: embedding, // Pass the embedding you want to compare
-      match_threshold: 0.78, // Choose an appropriate threshold for your data
-      match_count: 10, // Choose the number of matches
+      query_embedding: embedding,
+      match_threshold: 0.80,
+      match_count: 5,
     },
   );
 

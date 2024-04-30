@@ -4,7 +4,9 @@ import { supabase } from "./supabase-client.js";
 import { forEachJsonFile } from "./files-utils.js";
 
 forEachJsonFile(DB_DIRECTORY, async (notebook) => {
-  const notebookAsMarkdown = exportCellsAsMarkdown(notebook.cells);
+  const cellsAsMarkdown = exportCellsAsMarkdown(notebook.cells);
+  const notebookAsMarkdown = `# ${notebook.title} \n ${cellsAsMarkdown}`;
+
   const { data: embeddingResponse, error } = await supabase.functions.invoke(
     "notebook-to-embeddings",
     {

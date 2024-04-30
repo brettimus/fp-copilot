@@ -11,5 +11,6 @@ const { data: matches, error } = await supabase.functions.invoke(
   }
 );
 
-console.log("Searching: ", query);
-console.log("Matches:", "\n", matches.map((match) => match.title).join("\n"));
+console.log("🔎 Searching: ", query);
+console.log("🤗 Matches:", "\n");
+console.log(matches.map((match) => `  ${match.title}\n  ${match.similarity}\n  *****`).join("\n"));

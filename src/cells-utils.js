@@ -74,10 +74,15 @@ function getCellAsMarkdown(cell) {
         let queryData = intent.queryData;
         if (!queryData) {
           queryData = cell.queryData?.split(QUERY_DATA_MIMETYPE_PREFIX)[1];
-          queryData = queryData?.replace("query=", "");
+          if (queryData) {
+            const params = new URLSearchParams(queryData); // This automatically handles decoding
+            if (params?.get("query")) {
+              queryData = params.get("query");
+            }
+          }
         }
 
-        let text = `[${formatProviderType(intent.providerType)}]`;
+        let text = `[provider:${formatProviderType(intent.providerType)}]`;
 
         if (queryData) {
           text += "\nQuery\n```\n"

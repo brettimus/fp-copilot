@@ -4,8 +4,11 @@
     "@supabase/supabase-js": "^2.42.7"
   },
   "scripts": {
-
+    "clean": "npm run reset",
+    "clear": "npm run reset",
+    "copilot": "node src/copilot",
     "embeddings:create": "node src/embeddings-create",
+    "embeddings:generate": "npm run embeddings:create",
     "reset": "node src/reset",
     "search": "node src/search-notebooks"
   }
