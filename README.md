@@ -18,11 +18,12 @@ create table notebooks (
   id serial primary key,
   title text not null,
   notebook_id text not null,
+  markdown text not null,
   embedding vector(384)
 );
 ```
 
-- Create a matching function 
+- Create a matching function (copy-paste into sql editor)
 
 ```sql
 create or replace function match_notebooks (
@@ -32,8 +33,9 @@ create or replace function match_notebooks (
 )
 returns table (
   id bigint,
-  title text,
   notebook_id text,
+  title text,
+  markdown text,
   similarity float
 )
 language sql stable
@@ -42,6 +44,7 @@ as $$
     notebooks.id,
     notebooks.notebook_id,
     notebooks.title,
+    notebooks.markdown,
     1 - (notebooks.embedding <=> query_embedding) as similarity
   from notebooks
   where 1 - (notebooks.embedding <=> query_embedding) > match_threshold

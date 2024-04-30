@@ -1,15 +1,15 @@
-import fs from "node:fs";
-import path from "node:path";
-
+import { exportCellsAsMarkdown } from "./cells-utils.js";
 import { supabase } from "./client.js";
+import { forEachJsonFile } from "./files-utils.js";
 
 const directoryPath = "./db";
 
 forEachJsonFile(directoryPath, async (notebook) => {
+  const notebookAsMarkdown = exportCellsAsMarkdown(notebook.cells);
   const { data: embeddingResponse, error } = await supabase.functions.invoke(
     "notebook-to-embeddings",
     {
-      body: { notebook },
+      body: { notebook: notebookAsMarkdown },
     }
   );
 
@@ -26,6 +26,7 @@ forEachJsonFile(directoryPath, async (notebook) => {
     notebook_id: notebook.id,
     embedding: embeddingResponse.embedding,
     title: notebook.title,
+    markdown: notebookAsMarkdown,
   };
 
   // Store the vector in Postgres
@@ -44,27 +45,6 @@ forEachJsonFile(directoryPath, async (notebook) => {
   console.log(`Created embeddings for ${notebook.title}`);
   console.log(data);
 });
-
-function forEachJsonFile(directory, callback) {
-  fs.readdir(directory, (err, files) => {
-    if (err) {
-      return console.error(`Unable to scan directory: ${err}`);
-    }
-
-    const jsonFiles = files.filter((file) => path.extname(file) === ".json");
-
-    for (const file of jsonFiles) {
-      fs.readFile(path.join(directory, file), "utf8", async (err, contents) => {
-        if (err) {
-          return console.error(`Unable to read file: ${err}`);
-        }
-
-        callback(JSON.parse(contents));
-      });
-    }
-  });
-
-}
 
 /**
  * Helper that can create embeddings for each "chunk" of a notebook
