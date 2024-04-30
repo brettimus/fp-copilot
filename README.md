@@ -2,16 +2,16 @@
 ## Setup
 
 - Install dependencies: `npm i`
-- Set environment variables: `cp .env.example .env`
-- Serve edge functions `supabase functions serve`
+- Set environment variables: `cp .env.example .env` and add your workspace ID
+- Serve edge functions `supabase functions serve` to be able to create embeddings
 
 ### Database Setup
 
 - Start the database: `supabase start`
 
-- Enable embeddings in pg (see: https://supabase.com/docs/guides/ai/vector-columns)
+- Visit `http://localhost:54323` and enable the `vector` extension in pg to store embeddings (see: https://supabase.com/docs/guides/ai/vector-columns)
 
-- Create a table to hold the embeddings
+- Create a table to hold the embeddings (execute this in teh SQL console in the local supabase dashboard)
 
 ```sql
 create table notebooks (
@@ -23,7 +23,7 @@ create table notebooks (
 );
 ```
 
-- Create a matching function (copy-paste into sql editor)
+- Create a matching function (again, copy-paste this into sql editor)
 
 ```sql
 create or replace function match_notebooks (
@@ -53,16 +53,22 @@ as $$
 $$;
 ```
 
-
-## Trying it out
+## Try it out
 
 ```sh
-# Create a database of notebooks locally as json files
-./create-database.sh
+# Create copies of notebooks locally as json files
+# Contents are saved as individual files to the `db` directory
+./fetch-notebooks.sh
 
 # Create embeddings for each notebook in Postgres
-node generate-embeddings.js
+npm run embeddings:create
 
 # Search embeddings
-node search-notebooks.js "hello world"
+npm run search "hello world"
 ```
+
+## Notes
+
+- Notebooks are converted from a json array of cells into markdown, using some heuristics copied over from studio. This is very hacky.
+
+- You may want to delete all the notebooks in the `db` directory, as well as the embeddings in postgres, before running the script to re-create them. You can use `npm run reset` to do this.

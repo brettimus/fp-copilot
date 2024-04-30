@@ -1,4 +1,4 @@
-import { supabase } from "./client.js";
+import { supabase } from "./supabase-client.js";
 
 // const query = "getting started"
 const [_0, _1, ...queryTerms] = process.argv;
@@ -11,4 +11,5 @@ const { data: matches, error } = await supabase.functions.invoke(
   }
 );
 
-console.log(matches)
+console.log("Searching: ", query);
+console.log("Matches:", "\n", matches.map((match) => match.title).join("\n"));

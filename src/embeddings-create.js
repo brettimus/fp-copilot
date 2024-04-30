@@ -1,10 +1,9 @@
 import { exportCellsAsMarkdown } from "./cells-utils.js";
-import { supabase } from "./client.js";
+import { DB_DIRECTORY } from "./constants.js";
+import { supabase } from "./supabase-client.js";
 import { forEachJsonFile } from "./files-utils.js";
 
-const directoryPath = "./db";
-
-forEachJsonFile(directoryPath, async (notebook) => {
+forEachJsonFile(DB_DIRECTORY, async (notebook) => {
   const notebookAsMarkdown = exportCellsAsMarkdown(notebook.cells);
   const { data: embeddingResponse, error } = await supabase.functions.invoke(
     "notebook-to-embeddings",
@@ -13,7 +12,6 @@ forEachJsonFile(directoryPath, async (notebook) => {
     }
   );
 
-  // TODO - handle error
   if (error) {
     console.error(
       `Error creating embedding for notebook ${notebook.title} (${notebook.id})`,
@@ -29,7 +27,7 @@ forEachJsonFile(directoryPath, async (notebook) => {
     markdown: notebookAsMarkdown,
   };
 
-  // Store the vector in Postgres
+  // Store the vector (embeddings) in Postgres
   const { data, error: insertError } = await supabase
     .from("notebooks")
     .insert(notebookEmbedding);
@@ -43,7 +41,6 @@ forEachJsonFile(directoryPath, async (notebook) => {
   }
 
   console.log(`Created embeddings for ${notebook.title}`);
-  console.log(data);
 });
 
 /**

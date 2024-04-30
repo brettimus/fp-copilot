@@ -1,6 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 
+/**
+ * Helper function to iterate all json files in a directory and yield their (parsed) contents to a callback
+ */
 export function forEachJsonFile(directory, callback) {
   fs.readdir(directory, (err, files) => {
     if (err) {

@@ -2,5 +2,11 @@
   "type": "module",
   "dependencies": {
     "@supabase/supabase-js": "^2.42.7"
+  },
+  "scripts": {
+
+    "embeddings:create": "node src/embeddings-create",
+    "reset": "node src/reset",
+    "search": "node src/search-notebooks"
   }
 }
