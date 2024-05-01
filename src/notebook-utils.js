@@ -24,9 +24,12 @@ export function notebookToMarkdown(notebook) {
  */
 export function serializeFrontMatterIntoMarkdown(frontMatter) {
   return `
+---
+Frontmatter
 \`\`\`json
 ${JSON.stringify(frontMatter, null, 2)}
 \`\`\`
+---
 `.trim();
 }
 
