@@ -22,7 +22,7 @@ export function notebookToMarkdown(notebook) {
 /**
  * Utility function for including frontmatter in the markdown representation of the notebook
  */
-export function serializeFrontMatterIntoMarkdown(frontMatter) {
+function serializeFrontMatterIntoMarkdown(frontMatter) {
   return `
 ---
 Frontmatter
@@ -34,11 +34,11 @@ ${JSON.stringify(frontMatter, null, 2)}
 }
 
 /**
- * Exports the given cells as Markdown.
+ * Renders the given cells as Markdown. This is a major hack! Needs more thought.
  *
  * TODO: This does not yet apply formatting annotations.
  */
-export function exportCellsAsMarkdown(cells) {
+function exportCellsAsMarkdown(cells) {
   let text = "";
   let previousCell;
   for (const cell of cells) {
