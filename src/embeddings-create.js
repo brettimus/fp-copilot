@@ -1,11 +1,24 @@
-import { exportCellsAsMarkdown } from "./cells-utils.js";
+import {
+  exportCellsAsMarkdown,
+  serializeFrontMatterIntoMarkdown,
+} from "./cells-utils.js";
 import { DB_DIRECTORY } from "./constants.js";
 import { supabase } from "./supabase-client.js";
 import { forEachJsonFile } from "./files-utils.js";
 
 forEachJsonFile(DB_DIRECTORY, async (notebook) => {
-  const cellsAsMarkdown = exportCellsAsMarkdown(notebook.cells);
-  const notebookAsMarkdown = `# ${notebook.title} \n ${cellsAsMarkdown}`;
+  const markdownTitle = `# ${notebook.title}`;
+  const markdownFrontMatter = serializeFrontMatterIntoMarkdown(
+    notebook.frontmatter
+  );
+  const markdownCells = exportCellsAsMarkdown(notebook.cells);
+
+  const notebookAsMarkdown = [
+    markdownTitle,
+    markdownFrontMatter,
+    markdownCells,
+  ].join("\n");
+  P;
 
   const { data: embeddingResponse, error } = await supabase.functions.invoke(
     "notebook-to-embeddings",

@@ -1,4 +1,36 @@
 /**
+ * Creates a (hacky) markdown representation of the given notebook.
+ * Makes it easier to do embeddings search on the document contents,
+ * since solely relying on the json representation of cells makes similarit scores really wonky
+ */
+export function notebookToMarkdown(notebook) {
+  const markdownTitle = `# ${notebook.title}`;
+  const markdownFrontMatter = serializeFrontMatterIntoMarkdown(
+    notebook.frontMatter
+  );
+  const markdownCells = exportCellsAsMarkdown(notebook.cells);
+
+  const notebookAsMarkdown = [
+    markdownTitle,
+    markdownFrontMatter,
+    markdownCells,
+  ].join("\n");
+
+  return notebookAsMarkdown;
+}
+
+/**
+ * Utility function for including frontmatter in the markdown representation of the notebook
+ */
+export function serializeFrontMatterIntoMarkdown(frontMatter) {
+  return `
+\`\`\`json
+${JSON.stringify(frontMatter, null, 2)}
+\`\`\`
+`.trim();
+}
+
+/**
  * Exports the given cells as Markdown.
  *
  * TODO: This does not yet apply formatting annotations.
@@ -70,7 +102,7 @@ function getCellAsMarkdown(cell) {
       try {
         const intent = parseIntent(cell.intent);
         // INVESTIGATE - The welcome notebooks might be using old provider protocol or something?
-        //               I had to manually parse the query data instead of relying on intent /shrug 
+        //               I had to manually parse the query data instead of relying on intent /shrug
         let queryData = intent.queryData;
         if (!queryData) {
           queryData = cell.queryData?.split(QUERY_DATA_MIMETYPE_PREFIX)[1];
@@ -85,7 +117,7 @@ function getCellAsMarkdown(cell) {
         let text = `[provider:${formatProviderType(intent.providerType)}]`;
 
         if (queryData) {
-          text += "\nQuery\n```\n"
+          text += "\nQuery\n```\n";
           text += decodeURIComponent(queryData);
           text += "\n```\n";
         }

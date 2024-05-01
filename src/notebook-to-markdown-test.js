@@ -5,13 +5,12 @@
 
 import { inspect } from "node:util";
 
-import { exportCellsAsMarkdown } from "./cells-utils.js";
+import { notebookToMarkdown } from "./notebook-utils.js";
 import { DB_DIRECTORY } from "./constants.js";
 import { forEachJsonFile } from "./files-utils.js";
 
 forEachJsonFile(DB_DIRECTORY, (notebook) => {
-  const cells = notebook.cells;
-  const markdown = exportCellsAsMarkdown(cells);
+  const markdown = notebookToMarkdown(notebook);
 
   console.log(inspect(markdown, { depth: 5 }));
 });
