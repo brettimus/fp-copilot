@@ -159,3 +159,93 @@
     }
   ]
 }
+
+{
+  "role": "assistant",
+  "content": null,
+  "tool_calls": [
+    {
+      "id": "call_HZjlBHMKIQ9IxetJj6y3HPHj",
+      "type": "function",
+      "function": {
+        "name": "summarize_similar_notebooks",
+        "arguments": "{\"notebooks\":[{\"title\":\"Slowness on api service for animalbuttons\",\"id\":\"41\"}]}"
+      }
+    }
+  ]
+}
+
+{
+  "role": "assistant",
+  "content": null,
+  "tool_calls": [
+    {
+      "id": "call_Btw91RZGoe9MZnYyQFkidoTs",
+      "type": "function",
+      "function": {
+        "name": "summarize_similar_notebooks",
+        "arguments": "{\"notebooks\":[{\"title\":\"Slowness on animalbuttons API\",\"id\":\"41\",\"commander\":{\"id\":\"user-123\",\"name\":\"Brett Beutell\"}}]}"
+      }
+    }
+  ]
+}
+
+{
+  "role": "assistant",
+  "content": null,
+  "tool_calls": [
+    {
+      "id": "call_TQ7YKpfRxndsBPJvr9G7tWLQ",
+      "type": "function",
+      "function": {
+        "name": "summarize_similar_notebooks",
+        "arguments": "{\"notebooks\":[{\"title\":\"Slowness on animalbuttons API\",\"id\":\"52\",\"commander\":{\"id\":\"izaauWVzR_Cdx3X658lMdw\",\"name\":\"Oscar van Zijverden\"}}]}"
+      }
+    }
+  ]
+}
+
+{
+  "role": "assistant",
+  "content": null,
+  "tool_calls": [
+    {
+      "id": "call_9DyDwTtWzBTg2zB23fz6RRZy",
+      "type": "function",
+      "function": {
+        "name": "summarize_similar_notebooks",
+        "arguments": "{\"notebooks\":[{\"title\":\"Slowness on animalbuttons API\",\"id\":\"JrxQznGXRj-F8r3PRmRhvA\"}]}"
+      }
+    }
+  ]
+}
+
+{
+  "role": "assistant",
+  "content": null,
+  "tool_calls": [
+    {
+      "id": "call_7wXG0ORrLWVJRXdkud6PDKeU",
+      "type": "function",
+      "function": {
+        "name": "summarize_similar_notebooks",
+        "arguments": "{\"notebooks\":[{\"title\":\"Slowness on animalbuttons API\",\"id\":\"JrxQznGXRj-F8r3PRmRhvA\"}]}"
+      }
+    }
+  ]
+}
+
+{
+  "role": "assistant",
+  "content": null,
+  "tool_calls": [
+    {
+      "id": "call_Ch05crZcA1cKv636wTSNAaT4",
+      "type": "function",
+      "function": {
+        "name": "summarize_similar_notebooks",
+        "arguments": "{\"notebooks\":[{\"title\":\"Slowness on animalbuttons API\",\"id\":\"JrxQznGXRj-F8r3PRmRhvA\",\"commander\":{\"id\":\"izaauWVzR_Cdx3X658lMdw\",\"name\":\"Oscar van Zijverden\"}}]}"
+      }
+    }
+  ]
+}

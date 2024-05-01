@@ -56,12 +56,10 @@ $$;
 ## Try it out
 
 ```sh
-# Create copies of notebooks locally as json files
-# Contents are saved as individual files to the `db` directory
-./fetch-notebooks.sh
-
-# Create embeddings for each notebook in Postgres
-npm run embeddings:create
+# Creates copies of notebooks locally as json files (contents are saved as individual files to the `db` directory)
+# Then, creates embeddings for each notebook in Postgres,
+# while saving a hacky markdown representation of the notebook
+make setup
 
 # Search embeddings
 npm run search "hello world"
@@ -69,6 +67,20 @@ npm run search "hello world"
 
 ## Notes
 
-- Notebooks are converted from a json array of cells into markdown, using some heuristics copied over from studio. This is very hacky.
+- Notebooks are converted from a json array of cells into markdown, using some heuristics copied over from studio as well as a few homegrown heuristics in this repo. This is all very hacky.
 
-- You may want to delete all the notebooks in the `db` directory, as well as the embeddings in postgres, before running the script to re-create them. You can use `npm run reset` to do this.
+- You may want to delete all the notebooks in the `db` directory, as well as the embeddings in postgres, before running the script to re-create them. You can use `make clean` to delete everything, or `make reset` to clean up and recreate all data.
+
+
+- If you ever need to regenerate types from the database:
+
+```sh
+# https://supabase.com/docs/guides/api/rest/generating-types
+supabase gen types typescript --local > supabase/functions/_shared/database.types.ts
+```
+
+- To add a commander to a notebook in prod
+
+```sh
+fp nb fm append --key commander --value-type user
+```

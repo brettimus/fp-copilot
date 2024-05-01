@@ -13,10 +13,19 @@ export function notebookToMarkdown(notebook) {
   const notebookAsMarkdown = [
     markdownTitle,
     markdownFrontMatter,
+    serializeIdIntoTable(notebook.id),
     markdownCells,
   ].join("\n");
 
   return notebookAsMarkdown;
+}
+
+function serializeIdIntoTable(id) {
+  return `
+| notebook_id | id |
+| ----------- | -- |
+| notebook_id | ${id} |
+  `.trim();
 }
 
 /**
