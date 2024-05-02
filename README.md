@@ -84,3 +84,45 @@ supabase gen types typescript --local > supabase/functions/_shared/database.type
 ```sh
 fp nb fm append --key commander --value-type user
 ```
+
+### Working Locally
+
+```sh
+# Login to local setup
+API_BASE=http://localhost:1234 fp login
+
+# Create workspace
+WORKSPACE_CREATE_RESULT=$(API_BASE=http://localhost:1234 fp workspaces create -n animalbuttons -d Animalbuttons --output=json)
+
+WORKSPACE_ID=$(echo $WORKSPACE_CREATE_RESULT | jq -r '.id')
+
+# Set up your .env file so fp commands with your local setup in the animalbuttons workspace
+echo -e "\nAPI_BASE=http://localhost:1234" >> .env
+echo -e "\nWORKSPACE_ID=$WORKSPACE_ID" >> .env
+
+# Set up local environment with animalbuttons prometheus
+API_BASE=http://localhost:1234 \
+WORKSPACE_ID=$WORKSPACE_ID \
+  fp datasource create -n animalbuttons-prometheus -d "Production prometheus" --provider-type prometheus --provider-config '{ "url": "https://prometheus.animalbuttons.biz" }'
+
+# Create timestamps for example notebooks
+resolved_notebook_start=$(date -u -v-48H +"%Y-%m-%dT%H:%M:%SZ")
+resolved_notebook_end=$(date -u -v-32H +"%Y-%m-%dT%H:%M:%SZ")
+open_notebook_start=$(date -u -v-16H +"%Y-%m-%dT%H:%M:%SZ")
+open_notebook_end=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+# Add a (resolved) notebook to reference during current investigation
+API_BASE=http://localhost:1234 \
+WORKSPACE_ID=$WORKSPACE_ID \
+  fp template expand templates/resolved_slowness_on_animalbuttons_api.jsonnet \
+  start=$resolved_notebook_start,end=$resolved_notebook_end
+
+# Now, set up embeddings, etc., so copilot has data to work with
+make setup
+
+# Add current notebook to investigate open incident
+API_BASE=http://localhost:1234 \
+WORKSPACE_ID=$WORKSPACE_ID \
+  fp template expand templates/open_slowness_on_animalbuttons_api.jsonnet \
+  start=$open_notebook_start,end=$open_notebook_end
+```
