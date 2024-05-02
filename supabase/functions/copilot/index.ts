@@ -132,7 +132,7 @@ async function searchSimilarNotebooks(payload: any) {
 async function analyzeSimilarNotebooks(payload: any) {
   const { notebookId, incidentSummary } = payload;
 
-  const { data: notebookToAnalyze, error } = await getNotebookById(notebookId);
+  const { data: notebookToAnalyze, error } = await getNotebookByFpNotebookId(notebookId);
 
   if (error) {
     return { error };
@@ -319,6 +319,6 @@ function findSimilarNotebooks(query: string) {
   );
 }
 
-function getNotebookById(id: string) {
-  return supabaseClient.from("notebooks").select().eq("id", id).single();
+function getNotebookByFpNotebookId(notebookId: string) {
+  return supabaseClient.from("notebooks").select().eq("notebook_id", notebookId).single();
 }
