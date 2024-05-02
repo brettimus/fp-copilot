@@ -28,7 +28,7 @@ async function alertAssistantHandler(req: Request): Promise<Response> {
 
   const response = await getCompletionByAction(req);
 
-  if (response.error) {
+  if ("error" in response) {
     console.error("Error getting completion!", response.error);
     return new Response(JSON.stringify(response), {
       status: 500,
@@ -51,6 +51,8 @@ async function getCompletionByAction(req: Request) {
       return searchSimilarNotebooks(payload);
     case "ANALYZE_SIMILAR_NOTEBOOKS":
       return analyzeSimilarNotebooks(payload);
+    case "SUMMARIZE_NOTEBOOK":
+      return summarizeNotebook(payload);
     default:
       return getGenericCompletion(query);
   }
@@ -118,7 +120,12 @@ async function searchSimilarNotebooks(payload: any) {
   // TODO - use `tool_calls`
   //
   // const { content, tool_calls } = message;
-  // const function_call = tool_calls?.[0]?.function;
+  // message.tool_calls.forEach((toolCall) => {
+  //   const toolName = toolCall.function.name;
+  //   const toolArgs = toolCall.function.arguments;
+  //   const parsedArgs = JSON.parse(toolArgs);
+  //   const notebook = parsedArgs.notebooks[0];
+  // });
 
   return { id, message, response: response };
 }
@@ -132,7 +139,9 @@ async function searchSimilarNotebooks(payload: any) {
 async function analyzeSimilarNotebooks(payload: any) {
   const { notebookId, incidentSummary } = payload;
 
-  const { data: notebookToAnalyze, error } = await getNotebookByFpNotebookId(notebookId);
+  const { data: notebookToAnalyze, error } = await getNotebookByFpNotebookId(
+    notebookId,
+  );
 
   if (error) {
     return { error };
@@ -182,10 +191,67 @@ async function analyzeSimilarNotebooks(payload: any) {
   // TODO - use `tool_calls`
   //
   // const { content, tool_calls } = message;
-  // const function_call = tool_calls?.[0]?.function;
+  // message.tool_calls.forEach((toolCall) => {
+  //   const toolName = toolCall.function.name;
+  //   const toolArgs = toolCall.function.arguments;
+  //   const parsedArgs = JSON.parse(toolArgs);
+  //   const query = parsedArgs.datasource_queries[0];
+  // });
 
   return { id, message, response: response };
 }
+
+/**
+ * Uses the `summarize_similar_notebooks` tool to get a function-call completion from OpenAI's API
+ */
+
+// biome-ignore lint/suspicious/noExplicitAny: TODO - prototyping, fix type later
+async function summarizeNotebook(payload: any) {
+  const { notebook, investigationActions } = payload;
+
+  const openaiClient = new OpenAI();
+
+  const response = await openaiClient.chat.completions.create({
+    // NOTE - This model guarantees function calling to have json output
+    model: "gpt-4-turbo-preview",
+    messages: [
+      {
+        role: "system",
+        content: getSystemPrompt(),
+      },
+      {
+        role: "user",
+        content: getSummarizeNotebookPrompt(
+          notebook,
+          investigationActions
+        ),
+      },
+    ],
+    temperature: 0,
+    max_tokens: 2048,
+    tools: [
+      summarizeSimilarNotebooks,
+    ],
+  });
+
+  const {
+    id,
+    choices: [{ message }],
+  } = response;
+
+  // TODO - use `tool_calls`
+  //
+  // const { content, tool_calls } = message;
+  // message.tool_calls.forEach((toolCall) => {
+  //   const toolName = toolCall.function.name;
+  //   const toolArgs = toolCall.function.arguments;
+  //   const parsedArgs = JSON.parse(toolArgs);
+  //   const notebook = parsedArgs.notebooks[0];
+  // });
+
+  return { id, message, response: response };
+}
+
 
 /**
  * Gets a completion from OpenAI's API
@@ -282,6 +348,38 @@ ${notebookToAnalyze}
 `.trim();
 }
 
+function getSummarizeNotebookPrompt(notebook: string, investigationActions?: string[]) {
+  return `
+I have invesetigated an incident, and recorded the contents in a Fiberplane notebook.
+
+${investigationActions?.reduce((actionSummary, action) => {
+  return `${actionSummary}\n- ${action}`
+}, "These are the actions I took while resolving:")}
+
+Here is the notebook:
+
+${notebook}
+
+Please respond with a detailed summary of the notebook, in markdown. 
+
+This summary will go at the bottom of the notebook, so you do not need to recap things like the notebook title, notebook id, or current status.
+
+When you reference any similar notebooks, use a link with JSX syntax, like this:
+
+<NotebookReference notebookId="123">Notebook Title</NotebookReference>
+
+When you reference another user, like the commander, use a link with JSX syntax, like this:
+
+<UserReference userId="456">Commander Name</UserReference>
+
+Avoid platitudes, generalizations, and high-flying language, and focus on the incident at hand.
+
+DO NOT RESPOND IN JSON please. I only need markdown.
+
+I'll tip you $100 for a good response.
+`.trim();
+}
+
 /**
  * Creates a system prompt for the copilot
  * I made this a function so we could inject additional context as we see fit
@@ -306,7 +404,7 @@ Here are your instructions:
 - Be clear and concise
 - Think step by step
 - Take a deep breath before responding
-- Always respond with valid json
+- Always respond with valid json, unless otherwise specified
 `.trim();
 }
 
@@ -320,5 +418,6 @@ function findSimilarNotebooks(query: string) {
 }
 
 function getNotebookByFpNotebookId(notebookId: string) {
-  return supabaseClient.from("notebooks").select().eq("notebook_id", notebookId).single();
+  return supabaseClient.from("notebooks").select().eq("notebook_id", notebookId)
+    .single();
 }
