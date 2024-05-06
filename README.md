@@ -125,4 +125,9 @@ API_BASE=http://localhost:1234 \
 WORKSPACE_ID=$WORKSPACE_ID \
   fp template expand templates/open_slowness_on_animalbuttons_api.jsonnet \
   start=$open_notebook_start,end=$open_notebook_end
+
+
+# If you ever need to add the commander frontmatter back to a notebook
+API_BASE=http://localhost:1234 fp nb fm append --key commander --value-type user
+
 ```
